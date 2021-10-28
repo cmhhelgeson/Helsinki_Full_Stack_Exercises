@@ -50,22 +50,38 @@ function App() {
     ]
   })
 
-
+  const [input_text, setText] = useState("");
+  const [timer, setTimer] = useState(0);
 
   const addPart = () => {
     const new_part = {
-      name: "A hypothetical class section",
-      exercises: 21
+      name: input_text, 
+      exercises: (Math.floor(Math.random() * 25) + 1)
     }
     setCourse({...course, parts: [...course.parts, new_part]});
   }
+
+  const changeText = (event) => {
+    setText(event.target.value);
+  }
+
+  setTimeout(
+    () => {
+      setTimer(timer + 1)
+    }, [1000]
+  );
 
   return (
     <div className="App">
       <Header course={course}/>
       <Content course={course}/>
       <Total course={course}/>
-      <input type="submit" text="New Part" onClick={addPart}/>
+      <label for="course_input">Input Course Info and Exercises: </label>
+      <br></br>
+      <input type="text" name="course_input" onChange={changeText}/>
+      <input type="submit" name="course_input"text="New Part" onClick={addPart}/>
+      <p>{timer}</p>
+       
     </div>
   );
 }
