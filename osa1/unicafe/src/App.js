@@ -34,13 +34,50 @@ const Buttons = ({state, updateKey}) => {
   
 }
 
+const StatisticLine = ({text, value}) => {
+  return (
+    <tr>
+      <td>{text}: {value}</td>
+    </tr>
+  );
+}
+
+const Statistics = ({state}) => {
+  <h3>Statistics</h3>
+  if (state.Good + state.Bad + state.Neutral !== 0) {
+    return (
+
+    <table>
+    <StatisticLine text="Good" value={state.Good}/>
+    <StatisticLine text="Neutral" value={state.Neutral}/>
+    <StatisticLine text="Bad" value={state.Bad}/>
+    <StatisticLine text="Total" 
+      value={state.Good + state.Bad + state.Neutral} />
+    <StatisticLine text="Average"
+      value={(( ((state.Good * 1) + (state.Bad * -1) 
+      ) / (state.Good + state.Neutral + state.Bad))).toFixed(2)}/>
+    <StatisticLine text="Positive" value={
+      state.Good / (state.Good + state.Bad + state.Neutral)} />
+    </table>
+    );
+  } else {
+    return (
+      <>
+      <br></br>
+      <p>No feedback given</p>
+      </>
+    );
+  }
+  
+}
+
 
 const App = () => {
 
   const [state, updateState] = useState({
     Good: 0,
     Neutral: 0, 
-    Bad: 0
+    Bad: 0,
   });
 
   const updateKey = (key_name) => {
@@ -48,13 +85,6 @@ const App = () => {
       {...state, [key_name]: state[key_name] + 1})
     );
   }
-
-  
-
-  
-
-  
-
   //onClick={() => updateKey('good')} this format makes it explicit that
   //you are passing in a function signature rather than a return value
   //onClick={updateKey('good')} calls that function on every render, not every button press, 
@@ -64,11 +94,10 @@ const App = () => {
     <div>
     <Header />
     <Buttons state={state} updateKey={updateKey}/>
+    <Statistics state={state} />
     <br></br>
-    <p>Good: {state.Good}</p>
-    <p>Neutral: {state.Neutral}</p>
-    <p>Bad: {state.Bad}</p>
     </div>
+    
 
   
   );
