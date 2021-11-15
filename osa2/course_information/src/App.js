@@ -1,60 +1,7 @@
 import React, {useState} from 'react'
 import "./App.css"
 
-const Courses = ({courses}) => {
-  return (
-    <div className="Courses">
-      {courses.map((course) => {
-        return <Course key={course.name} course={course} />
-      })}
-    </div>
-  )
-}
-
-const Course = ({course}) => {
-  return (
-  <div className="course">
-    <Header course={course}/>
-    <Content course={course}/>
-    <Total course={course}/> 
-  </div>);
-}
-
-
-const Part = ({part}) => {
-  return (
-    <div className="Part">
-      <p>{part.name} : {part.exercises}</p>
-    </div>
-  );
-}
-
-const Header = ({course}) => {
-  return (<header className="header">
-    <h1>{course.name}</h1>
-  </header>);
-}
-
-const Content = ({course}) => {
-  return (
-    <div className="Content">
-    {course.parts.map((part, partIndex) => {
-      /*Don't use index as key except in instances like these */
-      return <><Part key={partIndex}part={part}/></>
-    })}
-    </div>
-  )
-}
-
-const Total = ({course}) => {
-  return (
-  <div className="total">
-    <h3>Total of {course.parts.reduce((prev, cur) => {
-    return prev + cur.exercises; 
-  }, 0)
-  } exercises</h3>
-  </div>);
-}
+import Courses from "./Courses"
 
 function App() {
 

@@ -1,5 +1,5 @@
 import './App.css';
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 
 function App() {
   const anecdotes = [
@@ -23,23 +23,28 @@ function App() {
     6: 0
   });
 
+  const [highestVote, setHighestVote] = useState(0);
+
   const Vote = () => {
     setVotes(votes => (
       {...votes, [selected]: votes[selected] + 1})
     );
   }
 
-  const Highest_Votes = () => {
-    let i = 0;
+
+  useEffect(() => {
+    let temp_value = 0;
+    let temp_key = 0;
     for (const [key, value] of Object.entries(votes)) {
-      console.log(key);
-      if (value > i) {
-        i = key;
+      if (value > temp_value) {
+        console.log(temp_key + ": " + temp_value);
+        temp_value = value;
+        temp_key = key;
       }
     }
-    return anecdotes[i];
-    
-  }
+    setHighestVote(temp_key);
+  }, [votes]);
+
 
   return (
     <div>
@@ -49,9 +54,9 @@ function App() {
       <button onClick={() => setSelected((selected + 1) % anecdotes.length)}>
         Change
       </button>
-      <button onClick={() => Vote()}>Vote</button>
+      <button onClick={Vote}>Vote</button>
       <h3>Ancedote with most votes</h3>
-      <p>{() => Highest_Votes}</p>
+      <p>{anecdotes[highestVote]}</p>
       
     </div>
   )
