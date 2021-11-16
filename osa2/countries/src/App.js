@@ -2,45 +2,64 @@ import './App.css';
 import axios from 'axios'
 import React, {useState, useEffect} from 'react'
 import Countries from "./Countries"
-import Filter from './Filter'
+
+
+
+const Filter = ({filter, handleChange}) => {
+  return (
+    <div className="filter">
+      Find Countries: <input value={filter} onChange={handleChange} />
+    </div>
+  );
+}
 
 
 const App = () => {
 
   const [countries, setCountries] = useState([]);
   const [filter, setFilter] = useState('');
-  const shownCountries = 
-    filter.length === 0 ? countries
-  : countries.filter(country => 
-    country.name.common.toLowerCase().indexOf(filter) >= 0)
 
   const countryHook = () => {
-
-    const eventHandler = response => {
-      console.log('promise fulfilled');
+    axios.get('https://restcountries.com/v3.1/all').then(response => {
       setCountries(response.data);
-    }
-
-    const promise = axios.get('https://restcountries.com/v3.1/all');
-    promise.then(eventHandler);
-
+    });
   }
-
-  console.log('Yo')
-
   useEffect(countryHook, []);
+  const [shownCountries, setShownCountries] = useState(countries);
 
-  const changeFilter = event => {
-    setFilter(event.target.value.toLowerCase());
+
+  
+  
+
+  const handleFilter = (event) => {
+    setFilter(event.target.value);
+    setShownCountries(countries.filter(country => country.name.common.toLowerCase().includes(filter.toLowerCase())));
   }
+
+
+  const handleCountriesClick = (id) => {
+    console.log(id);
+    setShownCountries([countries.find(country => country.name.common === id)]);
+  }
+
+  const handleCountryClick = (event) => {
+    setShownCountries(countries.filter(country => country.name.common.toLowerCase().includes(filter.toLowerCase())));
+  }
+
 
 
   return (
-    <div className="App">
-      <Filter filter={filter} onChange={changeFilter}/>
-      <Countries countries={shownCountries} handleClick={/>
+    <div className="app">
+      <Filter value={filter} handleChange={handleFilter} />
+      <Countries 
+        countries={shownCountries} 
+        handleCountriesClick={handleCountriesClick}
+        handleCountryClick={handleCountryClick}/>
     </div>
   );
 }
 
 export default App;
+
+
+
