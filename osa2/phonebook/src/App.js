@@ -1,59 +1,18 @@
 import './App.css';
 import React, {useState, useEffect} from 'react'
-import axios from 'axios'
-
-const Filter = ({filter, changeName, changeValue}) => {
-  return (<div className="filter">
-    <h3>Search</h3>
-    Name: <input value={filter.name} type="text" onChange={changeName}></input>
-    Number: <input value={filter.value} type="text" onChange={changeValue}></input>
-  </div>);
-}
-
-const PhoneInput = ({name, changeName, value, changeValue, submitForm}) => {
-  return (
-    <form onSubmit={submitForm}>
-      <h2>Add a new</h2>
-      <div id='filter_name'>
-        Name: <input onChange={changeName} value={name} />
-      </div>
-      <div id='filter_value'>
-        Number: <input onChange={changeValue} value={value} />
-      </div>
-      <div>
-        <button type="submit">Add</button>
-      </div>
-    </form>
-  );
-}
-
-const Person = ({person}) => {
-  return (
-    <div className="person">
-      <p>{person.name} {person.number}</p>
-    </div>
-  );
-
-}
-
-const Persons = ({persons, filter}) => {
-  return(
-  <div className="persons">
-    {persons.filter(person => {
-      return person.name.substring(0, filter.name.length).toLowerCase() 
-        === filter.name.toLowerCase()
-    }).map((person) => {
-      return(<Person person={person}/>);
-    })}
-  </div>
-  );
+import Filter from './Filter'
+import PhoneInput from './PhoneInput';
+import Persons from './Persons';
+import Services from './Services';
+import Delete from './Delete';
 
 
-}
+
 
 const App = () => {
-  const [persons, setPersons ] = useState([]);
+  const [persons, setPersons] = useState([]);
   const[newName, setNewName] = useState('');
+  const[deleteCursor, setDeleteCursor] = useState(1);
 
   const[filter, setFilter] = useState({
     name:'',
@@ -63,14 +22,9 @@ const App = () => {
 
 
   const personHook = () => {
-    const eventHandler = response => {
-      console.log("Promise fulfilled");
-      setPersons(response.data);
-    }
-
-    const promise = axios.get("http://localhost:3001/persons");
-    promise.then(eventHandler);
-
+    Services.getAll().then(returned => {
+      setPersons(returned);
+    })
   }
   
   useEffect(personHook, [])
@@ -91,6 +45,10 @@ const App = () => {
     setFilter({...filter, value: e.target.value});
   }
 
+  const changeDelete = (e) => {
+    setDeleteCursor(e.target.value);
+  }
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -98,19 +56,51 @@ const App = () => {
       alert('Fill in information');
       return;
     }
-    let new_obj = {
-      name: newName,
-      number: number, 
-      id: persons.length
+
+    const new_person = {name: newName, number: number};
+    const person_exists = persons.find(p => p.name === newName);
+    const i = persons.indexOf(person_exists);
+    if (person_exists) {
+      if (window.confirm(`${new_person.name}'s number already exists\nWould you like to change it?`)) {
+        Services.update(person_exists.id, new_person).then(ret => {
+          //Not sure if shallow copy is a problem here
+          let temp = [...persons]
+          temp[i].number = number;
+          setPersons(temp)
+        })
+      }
+
+    } else {
+      Services.create(new_person).then(ret_obj => {
+      setPersons(persons.concat(ret_obj));
+      setNewName('');
+      setNumber('');
+    }).catch(error => {
+      console.log("Object Creation Failed");
+    })
+
     }
-    setPersons([...persons, new_obj]);
   }
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+    const id = persons[deleteCursor - 1].id;
+    if (window.confirm(`Delete ${persons[deleteCursor - 1].id}'s Number?`)) {
+      Services.deleteObj(id).then(() => {
+        setPersons(persons.filter(person => person.id !== id));
+      }).catch(error => {
+        //Put more descriptive error
+        console.log("Id already deleted");
+      })
+    }
+  }
+  
 
   return (
     <div>
       <Filter filter={filter} 
         changeName={changeFilterName}
-        changeValue={changeFilterValue}>Yo
+        changeValue={changeFilterValue}>
       </Filter>
       <PhoneInput
         name={newName}
@@ -120,6 +110,11 @@ const App = () => {
         submitForm={handleSubmit}
       ></PhoneInput>
       <Persons persons={persons} filter={filter} />
+      <Delete 
+        length={persons.length} 
+        changeDelete={changeDelete}
+        handleDelete={handleDelete}
+      />
       
 
     </div>
